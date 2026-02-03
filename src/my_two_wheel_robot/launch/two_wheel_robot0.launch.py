@@ -7,7 +7,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('my_two_wheel_robot')
-    xacro_file = os.path.join(pkg_share, 'urdf', 'my_two_wheel_robot.urdf.xacro')
+    xacro_file = os.path.join(pkg_share, 'urdf', 'my_two_wheel_robot0.urdf.xacro')
     rviz_config_file = os.path.join(pkg_share, 'rviz', 'urdf.rviz')
     controller_params_file = os.path.join(pkg_share, 'config', 'diff_drive_controllers.yaml')
 
