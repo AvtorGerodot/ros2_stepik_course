@@ -8,8 +8,13 @@ from launch_ros.parameter_descriptions import ParameterValue
 def generate_launch_description():
     pkg_share = get_package_share_directory('my_two_wheel_robot')
     xacro_file = os.path.join(pkg_share, 'urdf', 'my_two_wheel_robot.urdf.xacro')
-    rviz_config_file = os.path.join(pkg_share, 'rviz', 'urdf.rviz')
+    rviz_config_file = os.path.join(pkg_share, 'rviz', 'robot_lidar.rviz')
     controller_params_file = os.path.join(pkg_share, 'config', 'diff_drive_controllers.yaml')
+
+    gz_bridge_params_file = os.path.join(pkg_share, 'config', 'gz_bridge_param.yaml')
+
+
+
 
     # 1) Генерируем Substitution для xacro -> urdf
     robot_description_substitution = Command(['xacro ', xacro_file])
@@ -17,6 +22,29 @@ def generate_launch_description():
     robot_description = ParameterValue(robot_description_substitution, value_type=str)
     # 3) Готовим словарь
     robot_description_param = {'robot_description': robot_description}
+
+
+    # --- запуск моста gazebo - ros2 ---
+    gz_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='gz_lidar_bridge',
+        parameters=[{'config_file': gz_bridge_params_file}],
+        output='screen',
+    )
+
+    static_lidar_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_lidar_tf',
+        arguments=[
+            '0', '0', '0',          # x y z
+            '0', '0', '0',          # roll pitch yaw
+            'lidar_link',           # parent frame
+            'my_robot/lidar_link/lidar_sensor'  # child frame
+        ],
+        output='screen'
+    )
 
     # --- Узел robot_state_publisher ---
     rsp_node = Node(
@@ -79,6 +107,8 @@ def generate_launch_description():
 
     # Собираем всё в LaunchDescription
     return LaunchDescription([
+        gz_bridge,
+        static_lidar_tf,
         rsp_node,
         ros2_control_node,
         joint_state_spawner,
