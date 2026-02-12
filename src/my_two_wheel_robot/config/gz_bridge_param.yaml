@@ -1,4 +1,4 @@
-- ros_topic_name: "/scan"       # базовое имя
+- ros_topic_name: "/lidar_scan"
   gz_topic_name:  "/lidar"
   ros_type_name:  "sensor_msgs/msg/LaserScan"
   gz_type_name:   "gz.msgs.LaserScan"

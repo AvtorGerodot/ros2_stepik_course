@@ -3,7 +3,7 @@ slam_toolbox:
   ros__parameters:
 
     # Названия фреймов и топика лидара
-    scan_topic: /ldlidar_node/scan # Топик с лазерными сканами
+    scan_topic: /lidar_scan        # Топик с лазерными сканами
     odom_frame: odom               # Кадр одометрии (обычно "odom")
     map_frame: map                 # Глобальный фрейм карты
     base_frame: base_link          # Фрейм робота (лидара)
