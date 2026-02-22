@@ -1,0 +1,321 @@
+<?xml version="1.0"?>
+<robot name="dif_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="dif_robot_materials.xacro" />
+    <xacro:include filename="rod_macro.xacro" />
+
+    <!-- <xacro:include filename="wheel_macro.xacro" /> -->
+	<xacro:include filename="inertial_macros.xacro" />
+
+    
+
+    <!-- Корневое звено -->
+    <link name="odom"/>
+
+    <!-- ========== Первый уровень: основная платформа ========== -->
+    <link name="base_link">
+        <visual>
+        <geometry>
+            <box size="0.2 0.23 0.005"/>
+        </geometry>
+        <material name="black"/>
+        </visual>
+        <collision>
+        <geometry>
+            <box size="0.2 0.23 0.005"/>
+        </geometry>
+        </collision>
+
+        <xacro:inertial_box mass="2.0" x="0.2" y="0.23" z="0.005">
+			    <origin xyz="0 0 0" rpy="0 0 0"/>
+		</xacro:inertial_box>
+    </link>
+    <joint name="base_link_joint" type="fixed">
+        <parent link="odom"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+    
+
+    <!-- Четыре стойки (палки) от base_link к верхней платформе
+        Диаметр 10 мм => радиус 0.005 м
+        Длина ~0.19 м (от z=0.005 до z=0.195)
+        Располагаем их в углах (x=±0.09, y=±0.105) -->
+    
+    <xacro:rod_macro name_link="rod_front_left"     name_joint="rod_front_left_joint"   x_pos="0.09"    y_pos="0.105"/>
+    <xacro:rod_macro name_link="rod_front_right"    name_joint="rod_front_right_joint"  x_pos="0.09"    y_pos="-0.105"/>
+    <xacro:rod_macro name_link="rod_rear_left"      name_joint="rod_rear_left_joint"    x_pos="-0.09"   y_pos="0.105"/>
+    <xacro:rod_macro name_link="rod_rear_right"     name_joint="rod_rear_right_joint"   x_pos="-0.09"   y_pos="-0.105"/>
+
+
+    <!-- Колёсная база (левая сторона) -->
+    <link name="left_base">
+        <visual>
+        <geometry>
+            <box size="0.01 0.01 0.01"/>
+        </geometry>
+        </visual>
+    </link>
+    <joint name="left_base_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="left_base"/>
+        <origin xyz="0.05 0.13 0" rpy="0 0 0"/>
+    </joint>
+    <link name="left_wheel">
+        <visual>
+        <origin rpy="1.57075 0 0" xyz="0 0 0"/>
+        <geometry>
+            <cylinder length="0.025" radius="0.0325"/>
+        </geometry>
+        <material name="blue"/>
+        </visual>
+        <collision>
+        <origin rpy="1.57075 0 0" xyz="0 0 0"/>
+        <geometry>
+            <cylinder length="0.025" radius="0.0325"/>
+        </geometry>
+        </collision>
+
+        <xacro:inertial_cylinder mass="1" length="0.025" radius="0.0325">
+			    <origin xyz="0 0 0" rpy="1.57075 0 0"/>
+		</xacro:inertial_cylinder>
+
+    </link>
+    <joint name="left_wheel_joint" type="continuous">
+        <axis xyz="0 1 0"/>
+        <parent link="left_base"/>
+        <child link="left_wheel"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <command_interface name="velocity"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+    </joint>
+
+    <!-- Колёсная база (правая сторона) -->
+    <link name="right_base">
+        <visual>
+        <geometry>
+            <box size="0.01 0.01 0.01"/>
+        </geometry>
+        </visual>
+    </link>
+    <joint name="right_base_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="right_base"/>
+        <origin xyz="0.05 -0.13 0" rpy="0 0 0"/>
+    </joint>
+    <link name="right_wheel">
+        <visual>
+        <origin rpy="1.57075 0 0" xyz="0 0 0"/>
+        <geometry>
+            <cylinder length="0.025" radius="0.0325"/>
+        </geometry>
+        <material name="blue"/>
+        </visual>
+        <collision>
+        <origin rpy="1.57075 0 0" xyz="0 0 0"/>
+        <geometry>
+            <cylinder length="0.025" radius="0.0325"/>
+        </geometry>
+        </collision>
+
+        <xacro:inertial_cylinder mass="1" length="0.025" radius="0.0325">
+			    <origin xyz="0 0 0" rpy="1.57075 0 0"/>
+		</xacro:inertial_cylinder>
+    </link>
+    <joint name="right_wheel_joint" type="continuous">
+        <axis xyz="0 1 0"/>
+        <parent link="right_base"/>
+        <child link="right_wheel"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <command_interface name="velocity"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+    </joint>
+
+    <!-- Caster (опорное колесо) -->
+    <link name="caster_wheel">
+        <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+            <sphere radius="0.015"/>
+        </geometry>
+        <material name="white"/>
+        </visual>
+        <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+            <sphere radius="0.015"/>
+        </geometry>
+        </collision>
+        <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="1e-4" ixy="0" ixz="0"
+                iyy="1e-3" iyz="0" izz="1e-3"/>
+        </inertial>
+    </link>
+    <joint name="caster_wheel_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="caster_wheel"/>
+        <origin xyz="-0.09 0 -0.015" rpy="0 0 0"/>
+    </joint>
+
+    <!-- ========== Второй уровень: плата электроники ========== -->
+    <link name="electronics_plate">
+        <visual>
+            <!-- Нижняя поверхность на 0.0025 м -->
+            <origin xyz="0 0 0.0025" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.2 0.23 0.005"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+
+        <collision>
+            <origin xyz="0 0 0.0025" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.2 0.23 0.005"/>
+            </geometry>
+        </collision>
+
+        <xacro:inertial_box mass="0.6" x="0.2" y="0.23" z="0.005">
+			    <origin xyz="0 0 0.0025" rpy="0 0 0"/>
+		</xacro:inertial_box>
+    </link>
+    <joint name="electronics_plate_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="electronics_plate"/>
+        <origin xyz="0 0 0.065" rpy="0 0 0"/>
+    </joint>
+
+    <!-- ========== Третий уровень: верхняя платформа ========== -->
+    <link name="top_plate">
+        <visual>
+        <origin xyz="0 0 0.0025" rpy="0 0 0"/>
+        <geometry>
+            <box size="0.2 0.23 0.005"/>
+        </geometry>
+        <material name="black"/>
+        </visual>
+        <collision>
+        <origin xyz="0 0 0.0025" rpy="0 0 0"/>
+        <geometry>
+            <box size="0.2 0.23 0.005"/>
+        </geometry>
+        </collision>
+        <!-- <inertial>
+        <mass value="0.8"/>
+        <origin xyz="0 0 0.0025" rpy="0 0 0"/>
+        <inertia ixx="1e-4" ixy="0" ixz="0"
+                iyy="1e-4" iyz="0" izz="1e-4"/>
+        </inertial> -->
+        <xacro:inertial_box mass="0.3" x="0.2" y="0.23" z="0.005">
+			    <origin xyz="0 0 0.0025" rpy="0 0 0"/>
+		</xacro:inertial_box>
+    </link>
+    <joint name="top_plate_joint" type="fixed">
+        <parent link="electronics_plate"/>
+        <child link="top_plate"/>
+        <origin xyz="0 0 0.130" rpy="0 0 0"/>
+    </joint>
+
+    <!-- ========== Лидар (на верхней платформе) ========== -->
+    <link name="lidar_link">
+        <visual>
+        <origin xyz="0 0 0.04" rpy="0 0 0"/>
+        <geometry>
+            <cylinder radius="0.035" length="0.05"/>
+        </geometry>
+        <material name="black"/>
+        </visual>
+        <collision>
+        <origin xyz="0 0 0.04" rpy="0 0 0"/>
+        <geometry>
+            <cylinder radius="0.035" length="0.05"/>
+        </geometry>
+        </collision>
+        <inertial>
+        <mass value="0.2"/>
+        <origin xyz="0 0 0.04" rpy="0 0 0"/>
+        <inertia ixx="1e-4" ixy="0" ixz="0"
+                iyy="1e-4" iyz="0" izz="1e-4"/>
+        </inertial>
+    </link>
+    <joint name="lidar_joint" type="fixed">
+        <parent link="top_plate"/>
+        <child link="lidar_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <gazebo reference="lidar_link">
+    <sensor name="lidar_sensor" type="gpu_ray">
+        <pose>0 0 0 0 0 0</pose>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+        <update_rate>10</update_rate>
+
+        <ray>
+        <scan>
+            <horizontal>
+            <samples>36</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.5708</min_angle>
+            <max_angle>1.5708</max_angle>
+            </horizontal>
+            <vertical>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+            </vertical>
+        </scan>
+        <range>
+            <min>0.08</min>
+            <max>2.0</max>
+            <resolution>0.01</resolution>
+        </range>
+        <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.01</stddev>
+        </noise>
+        </ray>
+    </sensor>
+    </gazebo>
+
+
+
+    <!-- ========== ros2_control (управление колесами) ========== -->
+    <ros2_control name="my_robot_hardware" type="system">
+        <hardware>
+        <plugin>mock_components/GenericSystem</plugin>
+        <param name="update_rate" type="int">50</param>
+        <param name="calculate_dynamics" type="bool">true</param>
+        </hardware>
+        <joint name="left_wheel_joint">
+        <command_interface name="velocity"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+        </joint>
+        <joint name="right_wheel_joint">
+        <command_interface name="velocity"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+        </joint>
+    </ros2_control>
+
+    <gazebo>
+        <plugin name="gz_ros2_control"
+                filename="libgz_ros2_control-system.so">
+            <!-- Имя модели в Gazebo (model name) должно совпадать с тем,
+                под которым ты спавнишь робота. Часто можно не указывать,
+                тогда плагин применится к этой модели. -->
+            <joint_state_topic>joint_states</joint_state_topic>
+            <robot_param>robot_description</robot_param>
+            <!-- Можно задать namespace, если нужно -->
+            <!-- <robot_namespace>/my_robot</robot_namespace> -->
+        </plugin>
+    </gazebo>
+
+
+</robot>

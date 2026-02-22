@@ -12,7 +12,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('my_two_wheel_robot')
-    xacro_file = os.path.join(pkg_share, 'urdf', 'dif_robot_description', 'dif_robot.urdf.xacro')
+    xacro_file = os.path.join(pkg_share, 'urdf', 'my_two_wheel_robot.urdf.xacro') # 'dif_robot_description', 'dif_robot.urdf.xacro'
     rviz_config_file = os.path.join(pkg_share, 'rviz', 'robot_lidar.rviz')
     controller_params_file = os.path.join(pkg_share, 'config', 'diff_drive_controllers.yaml')
 
@@ -30,7 +30,7 @@ def generate_launch_description():
     robot_description_param = {'robot_description': robot_description}
 
 
-
+    
     # запуск симулятора gazebo
     start_gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(gz_launch_file),
@@ -46,8 +46,8 @@ def generate_launch_description():
         arguments=[
             # '-entity', 'dif_robot',
             '-name', 'dif_robot',
-            '-topic', 'robot_description',
-            # '-file', robot_description_substitution,
+            # '-topic', 'robot_description',
+            '-file', xacro_file, # robot_description_substitution,
             # или: '-file', путь_к_urdf, если не через параметр
             '-z', '0.04',
         ],
@@ -134,14 +134,14 @@ def generate_launch_description():
     # Собираем всё в LaunchDescription
     return LaunchDescription([
         start_gz_sim,
-        gz_bridge,
+        # gz_bridge,
 
-        rsp_node,
-        ros2_control_node,
-        joint_state_spawner,
-        diff_drive_spawner,
-        joint_state_publisher_node,
-        rviz_node,
+        # rsp_node,
+        # ros2_control_node,
+        # joint_state_spawner,
+        # diff_drive_spawner,
+        # joint_state_publisher_node,
+        # rviz_node,
         spawn_robot,
-        twist_to_twiststamped,
+        # twist_to_twiststamped,
     ])

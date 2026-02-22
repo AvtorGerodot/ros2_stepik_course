@@ -6,8 +6,12 @@ from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
+    # pkg_share = get_package_share_directory('view_robot')
+    # xacro_file = os.path.join(pkg_share, 'urdf', 'view_robot.urdf.xacro')
+    # rviz_config_file = os.path.join(pkg_share, 'rviz', 'urdf.rviz')
+
     pkg_share = get_package_share_directory('view_robot')
-    xacro_file = os.path.join(pkg_share, 'urdf', 'view_robot.urdf.xacro')
+    xacro_file = os.path.join(get_package_share_directory('my_two_wheel_robot'), 'urdf', 'dif_robot_description', 'dif_robot.urdf.xacro')
     rviz_config_file = os.path.join(pkg_share, 'rviz', 'urdf.rviz')
 
     # 1) Генерируем Substitution для xacro -> urdf
