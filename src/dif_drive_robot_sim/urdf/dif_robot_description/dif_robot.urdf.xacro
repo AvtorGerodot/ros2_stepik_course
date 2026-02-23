@@ -308,7 +308,7 @@
 
             <!-- <parameters>$(find my_two_wheel_robot)/config/diff_drive_controllers.yaml</parameters> --> 
             <!-- new_dd_controllers.yaml -->
-            <parameters>/home/ager/ros2_ws/install/my_two_wheel_robot/share/my_two_wheel_robot/config/dd_controllers.yaml</parameters>
+            <parameters>/home/ager/ros2_ws/install/my_two_wheel_robot/share/dif_drive_robot_sim/config/dd_controllers.yaml</parameters>
         </plugin>
     </gazebo>
 
