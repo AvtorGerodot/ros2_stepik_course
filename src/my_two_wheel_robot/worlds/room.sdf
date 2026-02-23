@@ -32,7 +32,6 @@
     <plugin
       filename="gz-sim-sensors-system"
       name="gz::sim::systems::Sensors">
-      <!-- Обычно указывают движок рендеринга -->
       <render_engine>ogre2</render_engine>
     </plugin>
  

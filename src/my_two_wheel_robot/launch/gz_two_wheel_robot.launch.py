@@ -74,16 +74,16 @@ def generate_launch_description():
     )
 
     # --- Узел ROS2 Control (controller_manager) ---
-    ros2_control_node = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
-        output='screen',
-        parameters=[
-            robot_description_param,  # словарь (robot_description)
-            controller_params_file,    # путь к YAML
-            {'use_sim_time': True}
-        ]
-    )
+    # ros2_control_node = Node(
+    #     package='controller_manager',
+    #     executable='ros2_control_node',
+    #     output='screen',
+    #     parameters=[
+    #         robot_description_param,  # словарь (robot_description)
+    #         controller_params_file,    # путь к YAML
+    #         {'use_sim_time': True}
+    #     ]
+    # )
 
     # Спавним контроллеры
     joint_state_spawner = Node(
@@ -128,7 +128,8 @@ def generate_launch_description():
         package='twist_converter',
         executable='twist_to_twist_stamped',
         name='twist_to_twist_stamped',
-        output='screen', 
+        # output='screen',
+        output='log', 
     )
 
     # Собираем всё в LaunchDescription
@@ -137,11 +138,12 @@ def generate_launch_description():
         gz_bridge,
 
         rsp_node,
-        ros2_control_node,
+        # ros2_control_node,
         joint_state_spawner,
         diff_drive_spawner,
         joint_state_publisher_node,
         rviz_node,
+
         spawn_robot,
         twist_to_twiststamped,
     ])

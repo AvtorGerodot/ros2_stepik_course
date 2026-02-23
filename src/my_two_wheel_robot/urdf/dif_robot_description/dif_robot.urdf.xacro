@@ -138,14 +138,14 @@
         <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-            <sphere radius="0.015"/>
+            <sphere radius="0.01625"/>
         </geometry>
         <material name="white"/>
         </visual>
         <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-            <sphere radius="0.015"/>
+            <sphere radius="0.01625"/>
         </geometry>
         </collision>
         <inertial>
@@ -157,7 +157,7 @@
     <joint name="caster_wheel_joint" type="fixed">
         <parent link="base_link"/>
         <child link="caster_wheel"/>
-        <origin xyz="-0.09 0 -0.015" rpy="0 0 0"/>
+        <origin xyz="-0.09 0 -0.01625" rpy="0 0 0"/>
     </joint>
 
     <!-- ========== Второй уровень: плата электроники ========== -->
@@ -247,39 +247,29 @@
         <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
 
+    <!-- Gazebo sensor -->
     <gazebo reference="lidar_link">
-    <sensor name="lidar_sensor" type="gpu_ray">
-        <pose>0 0 0 0 0 0</pose>
-        <always_on>true</always_on>
-        <visualize>true</visualize>
+    <sensor name="gpu_lidar" type="gpu_lidar">
         <update_rate>10</update_rate>
-
-        <ray>
+        <topic>lidar_scan</topic>
+        <gz_frame_id>lidar_link</gz_frame_id>
+        <lidar>
         <scan>
             <horizontal>
-            <samples>36</samples>
+            <samples>720</samples>
             <resolution>1</resolution>
-            <min_angle>-1.5708</min_angle>
-            <max_angle>1.5708</max_angle>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
             </horizontal>
-            <vertical>
-            <samples>1</samples>
-            <resolution>1</resolution>
-            <min_angle>0</min_angle>
-            <max_angle>0</max_angle>
-            </vertical>
         </scan>
         <range>
-            <min>0.08</min>
-            <max>2.0</max>
+            <min>0.05</min>
+            <max>10.0</max>
             <resolution>0.01</resolution>
         </range>
-        <noise>
-            <type>gaussian</type>
-            <mean>0.0</mean>
-            <stddev>0.01</stddev>
-        </noise>
-        </ray>
+        </lidar>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
     </sensor>
     </gazebo>
 
@@ -288,10 +278,12 @@
     <!-- ========== ros2_control (управление колесами) ========== -->
     <ros2_control name="my_robot_hardware" type="system">
         <hardware>
-        <plugin>mock_components/GenericSystem</plugin>
+            <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        <!-- <plugin>mock_components/GenericSystem</plugin>
         <param name="update_rate" type="int">50</param>
-        <param name="calculate_dynamics" type="bool">true</param>
+        <param name="calculate_dynamics" type="bool">true</param> -->
         </hardware>
+        
         <joint name="left_wheel_joint">
         <command_interface name="velocity"/>
         <state_interface name="position"/>
@@ -305,8 +297,7 @@
     </ros2_control>
 
     <gazebo>
-        <plugin name="gz_ros2_control"
-                filename="libgz_ros2_control-system.so">
+        <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
             <!-- Имя модели в Gazebo (model name) должно совпадать с тем,
                 под которым ты спавнишь робота. Часто можно не указывать,
                 тогда плагин применится к этой модели. -->
@@ -314,6 +305,10 @@
             <robot_param>robot_description</robot_param>
             <!-- Можно задать namespace, если нужно -->
             <!-- <robot_namespace>/my_robot</robot_namespace> -->
+
+            <!-- <parameters>$(find my_two_wheel_robot)/config/diff_drive_controllers.yaml</parameters> --> 
+            <!-- new_dd_controllers.yaml -->
+            <parameters>/home/ager/ros2_ws/install/my_two_wheel_robot/share/my_two_wheel_robot/config/dd_controllers.yaml</parameters>
         </plugin>
     </gazebo>
 
