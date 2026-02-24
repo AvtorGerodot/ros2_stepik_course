@@ -13,20 +13,22 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 def generate_launch_description():
     pkg_share = get_package_share_directory('dif_drive_robot_sim')
     xacro_file = os.path.join(pkg_share, 'urdf', 'dif_robot_description', 'dif_robot.urdf.xacro')
-    rviz_config_file = os.path.join(pkg_share, 'rviz', 'robot_lidar.rviz')
+    rviz_config_file = os.path.join(pkg_share, 'rviz', 'slam_robot.rviz')
     controller_params_file = os.path.join(pkg_share, 'config', 'diff_drive_controllers.yaml')
 
-    # настройки для gazebo
+    # пути для gazebo и bridge
     world_path = os.path.join(pkg_share, 'worlds', 'room.sdf')
     gz_launch_file = os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
     gz_bridge_params_file = os.path.join(pkg_share, 'config', 'gz_bridge_param.yaml')
 
+    # пути для slam_toolbox
+    slam_launch_file = os.path.join(get_package_share_directory('slam_toolbox'), 'launch', 'online_sync_launch.py')
+    slam_params_file = os.path.join(pkg_share, 'config', 'slam_param.yaml')
 
-    # 1) Генерируем Substitution для xacro -> urdf
+
+    # Генерируем Substitution для xacro -> urdf; Явно указываем, что это строка; Готовим словарь
     robot_description_substitution = Command(['xacro ', xacro_file])
-    # 2) Явно указываем, что это строка
     robot_description = ParameterValue(robot_description_substitution, value_type=str)
-    # 3) Готовим словарь
     robot_description_param = {'robot_description': robot_description}
 
 
@@ -62,7 +64,7 @@ def generate_launch_description():
         output='screen',
     )
 
-    # --- Узел robot_state_publisher ---
+    # Узел robot_state_publisher 
     rsp_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -90,7 +92,6 @@ def generate_launch_description():
     )
 
     # (Опционально) узел joint_state_publisher_gui
-    # Для дифф. робота обычно не нужен, но если хотите видеть слайдеры, оставьте
     joint_state_publisher_node = Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
@@ -99,9 +100,7 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}]
     )
 
-
-
-    # --- RViz ---
+    # RViz2
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -111,16 +110,25 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}]
     )
 
+    # slam_toolbox
+    start_slam = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(slam_launch_file),
+         launch_arguments={
+            'slam_params_file': slam_params_file,
+        }.items()
+    )
+
     # Собираем всё в LaunchDescription
     return LaunchDescription([
-        start_gz_sim,
-        gz_bridge,
+        start_gz_sim,                   # 1
+        gz_bridge,                      # 2
 
-        rsp_node,
-        joint_state_spawner,
-        diff_drive_spawner,
-        joint_state_publisher_node,
-        rviz_node,
+        rsp_node,                       # 3
+        joint_state_spawner,            # 4
+        diff_drive_spawner,             # 5
+        joint_state_publisher_node,     # 6
 
-        spawn_robot,
+        rviz_node,                      # 7
+        spawn_robot,                    # 8
+        start_slam,                     # 9
     ])
